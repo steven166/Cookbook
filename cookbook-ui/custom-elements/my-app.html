@@ -1,0 +1,85 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="../routes/index-route.html">
+<link rel="import" href="../routes/recipe-route.html">
+<link rel="import" href="./app-theme.html">
+
+<dom-module id="my-app">
+  <template>
+    <style is="custom-styles">
+      body {
+        margin: 0;
+      }
+
+      index-route {
+        display: block;
+        height: 100vh;
+        overflow: auto;
+      }
+
+      recipe-route {
+        display: block;
+        height: 100vh;
+        overflow: auto;
+      }
+    </style>
+    <app-location route="{{route}}" use-hash-as-path></app-location>
+    <app-route route="{{route}}" pattern="/recipes/:recipeId" data="{{routedata}}" active="{{recipeActive}}"></app-route>
+    <app-route route="{{route}}" pattern="/" active="{{homeActive}}"></app-route>
+    <!--homeActive: [[homeActive]]-->
+    <!--recipeActive: [[recipeActive]]-->
+
+    <neon-animated-pages id="pages" selected="[[selectedPage]]" attr-for-selected="path" fallback-selection="home">
+      <index-route path="home" route="{{route}}" recipes="[[recipes]]"></index-route>
+      <recipe-route path="recipes" route="{{route}}" recipe="[[selectedRecipe]]"></recipe-route>
+    </neon-animated-pages>
+
+
+    <iron-ajax id="getRecipes" method="get" url="/api/v1/recipes" last-response="{{recipes}}" auto></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'my-app',
+      properties: {
+        selectedRecipe: {
+          type: Object,
+          computed: '_getSelectedRecipe(recipes, routedata)'
+        },
+        selectedPage: {
+          type: String,
+          computed: '_getSelectedPage(homeActive, recipeActive)'
+        }
+      },
+
+      listeners: {
+        'update-recipes': '_updateRecipes'
+      },
+
+      _updateRecipes: function () {
+        this.$.getRecipes.generateRequest();
+      },
+
+      _getSelectedRecipe: function (recipes, routedata) {
+//        var recipeId = route.path.split('/')[2];
+        if (recipes && routedata.recipeId) {
+          return recipes.filter(function (recipe) {
+            return recipe.id === routedata.recipeId;
+          })[0];
+        }
+        return null;
+      },
+
+      _getSelectedPage: function (homeActive, recipeActive) {
+        if (homeActive) {
+          return 'home';
+        } else if (recipeActive) {
+          return 'recipes';
+        }
+        return null;
+      }
+    });
+  </script>
+</dom-module>

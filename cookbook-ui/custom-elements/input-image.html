@@ -1,0 +1,100 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="input-image">
+  <template>
+    <style>
+      #preview-container{
+        display: inline-block;
+        position: relative;
+        width: var(--input-image-width, 300px);
+        height: var(--input-image-height, 150px);
+        cursor: pointer;
+        box-sizing: border-box;
+      }
+      #preview-text{
+        position: absolute;
+        height: 20px;
+        width: 100%;
+        top: 50%;
+        margin-top: -10px;
+        font-size: 16px;
+        text-align: center;
+        color: var(--paper-blue-500);
+      }
+
+      #preview{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    </style>
+
+    <input id="file" type="file" on-change="_onFileChange" hidden>
+    <div id="preview-container">
+      <template is="if" if="[[!_has(value)]]">
+        <strong id="preview-text">Afbeelding uploaden</strong>
+      </template>
+      <img id="preview" on-click="_openFileChooser" src="[[_asString(value)]]">
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'input-image',
+      properties: {
+        name: String,
+        value: {
+          type: String,
+          notify: true
+        },
+        preview: String,
+        file: {
+          type: Object,
+          notify: true
+        }
+      },
+
+      _openFile: function(){
+        this.$.file.trigger('click', {});
+      },
+
+      _onFileChange: function(){
+        var fileUpload = this.$.file;
+        if(fileUpload.files && fileUpload.files.length > 0){
+          this._loadFile(fileUpload.files[0]);
+        }
+      },
+
+      _loadFile: function(file){
+        this.set('file', file);
+        var _this = this;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var dataUrl = e.target.result;
+          dataUrl = dataUrl.split(',')[0];
+          var rawReader = new FileReader();
+          rawReader.onload = function(re){
+            dataUrl += ',' + btoa(re.target.result);
+            _this.set('value', dataUrl);
+            _this.$['preview-container'].setAttribute('loaded', 'true');
+          };
+          rawReader.readAsBinaryString(file);
+        };
+        reader.readAsDataURL(file);
+      },
+
+      _openFileChooser: function(){
+        var fileUpload = this.$.file;
+        fileUpload.click();
+      },
+      _has: function(value){
+        return value && value.trim().length > 0;
+      },
+      _asString: function(value){
+        if(value){
+          return value;
+        }
+        return "";
+      }
+    });
+  </script>
+</dom-module>

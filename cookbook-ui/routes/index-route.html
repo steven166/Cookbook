@@ -1,0 +1,150 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+<link rel="import" href="../custom-elements/recipe-card.html">
+<link rel="import" href="../custom-elements/recipe-form.html">
+
+
+<dom-module id="index-route">
+  <template>
+    <style>
+      :host{
+        position: relative;
+      }
+      #container {
+        display: flex;
+        flex-flow: row wrap;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      @media (max-width: 1200px) {
+        #container {
+          width: 100%;
+        }
+      }
+
+      #container .recipe-container{
+        width: 50%;
+        padding: 20px;
+        box-sizing: border-box;
+        height: 40vh;
+      }
+
+      #container .recipe-container:first-child {
+        width: 100%;
+        height: 50vh;
+      }
+
+      @media (max-width: 700px) {
+        #container .recipe-container {
+          width: 100%;
+          height: 40vh;
+        }
+
+        #container .recipe-container:first-child {
+          height: 50vh;
+        }
+      }
+
+      #container recipe-card {
+        width: 100%;
+        height: 100%;
+      }
+
+      paper-fab {
+        position: fixed;
+        right: 28px;
+        bottom: 28px;
+        background-color: var(--paper-red-500);
+      }
+    </style>
+    <div id="container">
+      <template is="dom-repeat" items="[[recipes]]">
+        <div on-selected="_goToRecipe" class="recipe-container">
+          <recipe-card item="[[item]]" index="[[index]]" class="recipe-card"></recipe-card>
+        </div>
+      </template>
+      <paper-fab icon="add" onclick="createRecipeForm.open()"></paper-fab>
+
+      <div on-submit="_createRecipe">
+        <recipe-form id="createRecipeForm" title="Nieuw Recept"></recipe-form>
+      </div>
+    </div>
+
+    <iron-ajax id="createRecipe" method="post" url="/api/v1/recipes" body="[[newRecipe]]" last-error="{{createRecipeError}}" on-response="_recipeCreated"></iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'index-route',
+      behaviors: [
+        Polymer.NeonSharedElementAnimatableBehavior
+      ],
+
+      properties: {
+        animationConfig: {
+          value: function() {
+            var recipes = Polymer.dom(this.root).querySelectorAll('.recipe-card');
+            var recipesArray = Array.prototype.slice.call(recipes);
+            return {
+              'entry': [{
+                name: 'cascaded-animation',
+                animation: 'scale-up-animation',
+                nodes: recipesArray
+              }],
+              'exit': [{
+                name: 'hero-animation',
+                id: 'hero',
+                fromPage: this
+              }, {
+                name: 'cascaded-animation',
+                animation: 'scale-down-animation'
+              }]
+            };
+          }
+        },
+
+        route: {
+          type: Object,
+          notify: true
+        },
+
+        recipes: Object
+      },
+
+      _createRecipe: function (e, formData) {
+        this.set('newRecipe', formData);
+        this.$.createRecipe.generateRequest();
+      },
+
+      _recipeCreated: function () {
+        this.$.createRecipeForm.close();
+        this.fire('update-recipes');
+      },
+
+      _goToRecipe: function(event, data) {
+        var target = Polymer.dom(event).rootTarget;
+        if (target.classList.contains('recipe-card')) {
+          // configure the page animation
+          this.sharedElements = {
+            'hero': target
+          };
+          var nodesToScale = [];
+          var recipes = Polymer.dom(this.root).querySelectorAll('.recipe-card');
+          for (var node, index = 0; node = recipes[index]; index++) {
+            if (node !== event.target) {
+              nodesToScale.push(node);
+            }
+          }
+          this.animationConfig['exit'][1].nodes = nodesToScale;
+
+          var id = data.id;
+          this.set('route.path', '/recipes/' + id);
+        }
+      }
+    });
+  </script>
+</dom-module>

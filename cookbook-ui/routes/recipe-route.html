@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animations.html">
+<link rel="import" href="../bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+<link rel="import" href="../custom-elements/recipe-card.html">
+
+<dom-module id="recipe-route">
+  <template>
+    <style>
+      .container {
+        position: absolute;
+        width: 1200px;
+        left: 50%;
+        margin-left: -600px;
+        margin-top: 50px;
+      }
+      @media (max-width: 1200px) {
+        .container {
+          width: 100%;
+          left: 0;
+          margin-left: 0;
+          margin-top: 0;
+        }
+      }
+      .container recipe-card{
+        --recipe-image-height: 300px;
+      }
+      #background{
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background-color: white;
+      }
+    </style>
+
+    <div id="background" on-tap="_goBack"></div>
+    <div class="container" id="recipeCard">
+      <recipe-card item="[[recipe]]" fading="false" details="true"></recipe-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'recipe-route',
+      behaviors: [
+        Polymer.NeonSharedElementAnimatableBehavior
+      ],
+      properties: {
+        sharedElements: {
+          value: function() {
+            return {
+              'hero': this.$.recipeCard
+            }
+          }
+        },
+        animationConfig: {
+          value: function() {
+            return {
+              'entry': [{
+                name: 'hero-animation',
+                id: 'hero',
+                toPage: this
+              },{
+                name: 'fade-in-animation',
+                node: this.$.background,
+                timing: 0
+              }],
+              'exit': [{
+                name: 'slide-up-animation',
+                node: this.$.recipeCard
+              },{
+                name: 'fade-out-animation',
+                node: this,
+                timing: 0
+              }]
+            };
+          }
+        },
+        recipe: Object,
+        route: {
+          type: Object,
+          notify: true
+        }
+      },
+
+      _goBack: function(){
+        this.set('route.path', '');
+      }
+    });
+  </script>
+</dom-module>

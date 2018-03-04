@@ -1,0 +1,126 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+<dom-module id="input-rating">
+  <template>
+    <style>
+      ::content .rating-bar {
+        display: inline-block;
+        cursor: pointer;
+        padding: 1px;
+      }
+      ::content input[disabled] + .rating-bar{
+        cursor: default;
+      }
+      ::content .rating-bar{
+        @apply(--recipe-rating);
+      }
+
+      ::content iron-icon {
+        color: var(--input-rating, #bdbdbd);
+        --iron-icon-height: 24px;
+        --iron-icon-width: 24px;
+      }
+
+      ::content iron-icon.selected {
+        color: var(--input-rating-selected, #ffeb3b);
+      }
+
+      ::content iron-icon.hover {
+        color: var(--input-rating-hover, #ffeb3b);
+      }
+
+
+      @media (max-width: 700px) {
+        ::content iron-icon {
+          --iron-icon-height: 16px;
+          --iron-icon-width: 16px;
+        }
+      }
+
+    </style>
+    <input type="number" name="[[name]]" value="[[value]]" hidden disabled="[[disabled]]">
+    <div id="rating-bar" class="rating-bar" on-mouseout="_mouseLeave">
+      <template is="dom-repeat" items="[[ratings]]" as="rating">
+        <iron-icon icon="[[icon]]" class$="{{_getSelectedClass(rating)}}" on-mouseover="_mouseEnter" data-index="[[index]]" on-tap="_changeRating"></iron-icon>
+      </template>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'input-rating',
+      properties: {
+        name: String,
+        value: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        count: {
+          type: Number,
+          value: 5
+        },
+        icon: {
+          type: String,
+          value: 'star'
+        },
+        hoverIndex: {
+          type: Number,
+          value: 0
+        },
+        ratings: {
+          type: Array,
+          computed: '_computeRatings(count,value,hoverIndex)'
+        },
+        disabled: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      _computeRatings: function (count, value, hoverIndex) {
+        var ratings = [];
+        for (var i = 1; i <= count; i++) {
+          var rating = {selected: value >= i, hover: hoverIndex >= i};
+          ratings.push(rating);
+        }
+        return ratings;
+      },
+
+      _getSelectedClass: function (rating) {
+        var clazz = '';
+        if (this.get('hoverIndex') == 0) {
+          if (rating.selected) {
+            clazz = 'selected';
+          }
+        }
+        if (rating.hover) {
+          clazz += ' hover';
+        }
+        return clazz;
+      },
+
+      _mouseEnter: function (e) {
+        if(this.get('disabled') !== true) {
+          var index = e.target.dataIndex + 1;
+          this.set('hoverIndex', index);
+        }
+      },
+
+      _mouseLeave: function (e) {
+        if(this.get('disabled') !== true) {
+          if (e.target.id === 'rating-bar') {
+            this.set('hoverIndex', 0);
+          }
+        }
+      },
+
+      _changeRating: function (e) {
+        if(this.get('disabled') !== true) {
+          var index = e.target.dataIndex + 1;
+          this.set('value', index);
+        }
+      }
+    });
+  </script>
+</dom-module>

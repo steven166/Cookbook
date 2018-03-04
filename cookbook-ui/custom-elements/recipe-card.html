@@ -1,0 +1,136 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="./input-rating.html">
+
+<dom-module id="recipe-card">
+  <template>
+    <style is="custom-styles">
+      :host paper-card {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+      }
+
+      :host paper-card .header {
+        flex: 1;
+      }
+
+      :host paper-card .header iron-image {
+        height: var(--recipe-image-height, 100%);
+        width: 100%;
+      }
+
+      :host paper-card .header .title-text {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: white;
+        text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+        @apply(--paper-font-headline);
+      }
+
+      :host .recipe-rating {
+        --recipe-rating: {
+          cursor: pointer !important;
+        };
+      }
+
+      :host .duration {
+        float: right;
+      }
+
+      :host #edit-button {
+        position: absolute;
+        right: 80px;
+        top: 8px;
+      }
+
+    </style>
+    <paper-card class="small" on-tap="_onTap">
+      <div class="header paper-card">
+        <iron-image src="[[_getSource(item.image)]]" placeholder="/assets/images/image-placeholder.gif" fade="[[fading]]" width="100%" height="100%" sizing="cover" preload="[[fading]]"></iron-image>
+        <div class="title-text over-image">[[item.title]]</div>
+      </div>
+      <div class="card-content">
+        <input-rating class="recipe-rating" count="5" value="[[item.ratings]]" disabled="true"></input-rating>
+        <span class="duration">
+            <iron-icon icon="alarm"></iron-icon>
+            [[item.duration]]
+          </span>
+        <paper-icon-button icon="create" id="edit-button" on-click="_editRecipe"></paper-icon-button>
+      </div>
+      <paper-ripple noink="[[details]]"></paper-ripple>
+      <template is="dom-if" if="[[details]]">
+        <div class="card-actions" id="card-content">
+          <template is="dom-if" if="item.description">
+            <h2>Beschrijving</h2>
+            <article>[[item.description]]</article>
+          </template>
+          <template is="dom-if" if="[[_has(item.ingredients)]]">
+            <h2>Ingrediënten</h2>
+            <ul>
+              <template is="dom-repeat" items="[[item.ingredients]]">
+                <li>[[item]]</li>
+              </template>
+            </ul>
+          </template>
+          <template is="dom-if" if="[[_has(item.instructions)]]">
+            <h2>Instructies</h2>
+            <ol>
+              <template is="dom-repeat" items="[[item.instructions]]">
+                <li>[[item]]</li>
+              </template>
+            </ol>
+          </template>
+        </div>
+      </template>
+    </paper-card>
+    <recipe-form id="editPopup" recipe="[[item]]" on-submit="_updateRecipe"></recipe-form>
+  </template>
+  <script>
+    Polymer({
+      is: 'recipe-card',
+      properties: {
+        item: Object,
+        index: Number,
+        fading: {
+          type: Boolean,
+          value: true
+        },
+        details: {
+          type: Boolean,
+          value: false
+        }
+      },
+      _getSource: function (url) {
+        return url || '/assets/images/unknown-image.jpg';
+      },
+      _onTap: function (e) {
+        this.fire('selected', this.get('item'));
+      },
+      _has: function (e) {
+        if (e) {
+          if (e.trim && e.trim() !== '') {
+            return true;
+          }
+          if (e.length && e.length > 0) {
+            return true;
+          }
+        }
+        return false;
+      },
+      _editRecipe: function () {
+        this.$.editPopup.open(this.item);
+      },
+      _updateRecipe: function(recipe){
+        this.set('item', recipe);
+      }
+    });
+  </script>
+</dom-module>

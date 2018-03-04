@@ -1,0 +1,259 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="./input-list.html">
+<link rel="import" href="./input-rating.html">
+<link rel="import" href="./input-image.html">
+<link rel="import" href="./app-theme.html">
+
+
+<dom-module id="recipe-form">
+  <template>
+    <style>
+      :host paper-dialog{
+        margin: 0;
+      }
+      :host paper-dialog-scrollable{
+        padding: 0;
+        margin: 0;
+        --paper-dialog-scrollable: {
+          padding: 0;
+        };
+      }
+
+      :host #form {
+        width: 1000px;
+      }
+      @media (max-width: 1040px){
+        :host #form {
+          width: 90vw;
+        }
+      }
+
+      :host paper-card{
+        width: 100%;
+      }
+
+      :host paper-card .header {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 300px;
+      }
+      :host paper-card .header input-image{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        --input-image-height: 100%;
+        --input-image-width: 100%;
+      }
+
+      :host paper-card .card-content{
+        display: flex;
+        padding-bottom: 0;
+      }
+
+      :host paper-card .card-content paper-input{
+        position: relative;
+        top: -10px;
+      }
+
+      :host paper-card .card-content input-rating{
+        flex: 1;
+      }
+
+      :host #form paper-input div[prefix] {
+        width: 20px;
+      }
+
+      :host #form .title-input {
+        position: absolute;
+        bottom: 0;
+        left: 20px;
+        margin-bottom: 20px;
+        --paper-input-container-focus-color: var(--paper-blue-500);
+        --paper-input-container-label: {
+          font-size: 2em;
+        };
+        --paper-input-container-label-floating: {
+          font-size: 1em;
+        };
+        --paper-input-container-input: {
+          font-size: 2em;
+          color: white;
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+        };
+      }
+
+      paper-button {
+        padding: 10px 30px;
+      }
+
+      paper-button iron-icon {
+        padding-right: 5px;
+      }
+
+      paper-button.blue {
+        background-color: var(--paper-blue-500);
+        color: white;
+      }
+
+      .control-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+
+    <paper-dialog id="dialog" entry-animation="fade-in-animation" exit-animation="fade-out-animation" with-backdrop>
+      <paper-dialog-scrollable>
+      <form is="iron-form" id="form" on-submit="_submit">
+      <paper-card>
+        <div class="header paper-card">
+          <input-image name="image" value="{{recipe.image}}" file="{{file}}"></input-image>
+          <div class="title-text over-image">
+            <paper-input name="title" label="Titel" class="title-input" value="[[recipe.title]]" required autofocus></paper-input>
+          </div>
+        </div>
+        <div class="card-content">
+          <input-rating name="ratings" value="[[recipe.rating]]"></input-rating>
+          <paper-input name="duration" placeholder="1.5u" value="[[recipe.duration]]" no-label-float></paper-input>
+        </div>
+        <div class="card-actions" id="card-content">
+          <h3>Beschrijving</h3>
+          <paper-textarea name="description" rows="2" no-label-float value="[[recipe.description]]"></paper-textarea>
+          <h3>Ingrediënten</h3>
+          <input-list name="ingredients" items="{{recipe.ingredients}}" placeholder="1.5g suiker" icon="chevron-right"></input-list>
+
+          <h3>Instructies</h3>
+          <input-list name="instructions" items="{{recipe.instructions}}" placeholder="Doe de suiker in een kom..." icon=""></input-list>
+          <div class="control-container">
+          <paper-button raised class="blue" on-tap="_submit">
+          <iron-icon icon="done"></iron-icon>
+          Opslaan
+          </paper-button>
+          </div>
+        </div>
+      </paper-card>
+      </form>
+      </paper-dialog-scrollable>
+      <!--<h2>[[title]]</h2>-->
+          <!--<paper-input name="title" label="Titel" class="title-input" value="[[recipe.title]]" required autofocus></paper-input>-->
+          <!--<input-rating name="ratings" value="[[recipe.rating]]"></input-rating>-->
+          <!--<h3>Beschrijving</h3>-->
+          <!--<paper-textarea name="description" rows="2" no-label-float>[[recipe.description]]</paper-textarea>-->
+
+          <!--<h3>Ingrediënten</h3>-->
+          <!--<input-list name="ingredients" items="{{recipe.ingredients}}" placeholder="1.5g suiker" icon="chevron-right"></input-list>-->
+
+          <!--<h3>Instructies</h3>-->
+          <!--<input-list name="instructions" items="{{recipe.instructions}}" placeholder="Doe de suiker in een kom..." icon=""></input-list>-->
+
+          <!--<h3>Afbeelding</h3>-->
+          <!--<input-image name="image" file="{{file}}"></input-image>-->
+
+          <!--<div class="control-container">-->
+            <!--<paper-button raised class="blue" on-tap="_submit">-->
+              <!--<iron-icon icon="done"></iron-icon>-->
+              <!--Opslaan-->
+            <!--</paper-button>-->
+          <!--</div>-->
+        <!--</form>-->
+      <!--</paper-dialog-scrollable>-->
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'recipe-form',
+
+      properties: {
+        title: String,
+        recipe: {
+          type: Object,
+          value: {
+            title: null,
+            rating: 0,
+            descriptions: null,
+            ingredients: [],
+            instructions: [],
+            image: null
+          },
+          notify: true
+        }
+      },
+
+      open: function (recipe) {
+        if (recipe === undefined) {
+          recipe = {
+            title: null,
+            rating: 0,
+            descriptions: null,
+            ingredients: [],
+            instructions: [],
+            image: null
+          };
+        }
+        this.set('recipe', recipe);
+        this.$.dialog.open();
+      },
+      close: function () {
+        this.$.dialog.close();
+      },
+
+      _submit: function () {
+        if (this.$.form.validate()) {
+          var object = this.$.form.serialize();
+          var recipe = {};
+          var formData = new FormData();
+
+          var ingredients = [];
+          var instructions = [];
+          for (var key in object) {
+            if (key.indexOf('ingredients') == 0) {
+              if (object[key] && object[key].trim()) {
+                ingredients.push(object[key]);
+              }
+            } else if (key.indexOf('instructions') == 0) {
+              if (object[key] && object[key].trim()) {
+                instructions.push(object[key]);
+              }
+            } else {
+              formData.set(key, object[key]);
+              recipe[key] = object[key];
+            }
+          }
+          formData.set('ingredients', ingredients);
+          formData.set('instructions', instructions);
+          recipe.ingredients = ingredients;
+          recipe.instructions = instructions;
+          if(this.get('file')){
+            formData.set('image', this.get('file'), this.get('file').name);
+          }
+
+          console.info('formData: ', formData);
+          var iterator = formData.keys();
+          while(true){
+            var key = iterator.next();
+            if(key.value){
+              console.info(key.value, ': ', formData.getAll(key.value));
+            }else{
+              break;
+            }
+          }
+
+          this.set('recipe', recipe);
+          this.fire('submit', formData);
+        }
+      }
+    });
+  </script>
+</dom-module>

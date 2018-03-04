@@ -1,0 +1,117 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="input-list">
+  <template>
+    <style>
+      :host paper-input{
+        --paper-input-prefix: {
+          width: 20px;
+          padding-right: 5px;
+          color: var(--paper-grey-500);
+        };
+        --paper-input-suffix: {
+          color: var(--paper-red-500);
+          padding: 0;
+          height: 24px;
+          position: relative;
+          top: -3px;
+        };
+      }
+    </style>
+    <template is="dom-repeat" items="[[realItems]]">
+      <paper-input id="item-[[index]]" name="[[name]]-[[index]]" placeholder="[[placeholder]]" on-keydown="_keydown" no-label-float>
+        <iron-icon icon="chevron-right" prefix></iron-icon>
+        <template is="if" if="[[index]]">
+          <paper-icon-button icon="remove" onclick="_removeItem(index)" suffix noink="true"></paper-icon-button>
+        </template>
+      </paper-input>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'input-list',
+
+      properties: {
+        placeholder: String,
+        name: String,
+        items: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+        realItems: {
+          type: Array,
+          computed: '_computeRealItems(items)'
+        }
+      },
+
+      _computeRealItems: function(items){
+        if(!Array.isArray(items)){
+          items = [items];
+        }
+        if(!items || items.length == 0){
+          return [''];
+        }
+        for(var i = items.length-1; i >=0; i--)
+          if(items[i] === ''){
+            items.splice(i, 1);
+          }else{
+            break;
+          }
+        if(items.length == 0 || !items[items.length-1] || items[items.length-1].trim() !== ''){
+          items.push('');
+        }
+        return items;
+      },
+
+      _nextItem: function(e){
+        var index = e ? parseInt(e.target.name.split('-')[1]): this.get('items').length;
+        var nextIndex = index + 1;
+        var _this = this;
+        setTimeout(function(){
+          if(_this.querySelector('#item-' + nextIndex)){
+            _this.querySelector('#item-' + nextIndex).focus();
+          }
+        }, 40);
+      },
+
+      _prevItem: function(e){
+        var index = e ? parseInt(e.target.name.split('-')[1]): this.get('items').length;
+        var prevIndex = index -1;
+        if(prevIndex >= 0){
+          if(this.querySelector('#item-' + prevIndex)){
+            this.querySelector('#item-' + prevIndex).focus();
+          }
+        }
+      },
+
+      _removeItem: function(e){
+        var index = e.target.dataset.index;
+        var index = parseInt(e.target.name.split('-')[1]);
+        this.splice('items', index, 1);
+      },
+
+      _keydown: function (e) {
+        // check if 'enter' was pressed
+        if (e.keyCode === 13) {
+          this._nextItem(e);
+        }else{
+          var _this = this;
+          setTimeout(function(){
+            var list = _this.get('items');
+            var index = parseInt(e.target.name.split('-')[1]);
+            list[index] = e.target.value;
+            _this.set('items', []);
+            _this.set('items', list);
+            if (e.keyCode === 8 && e.target.value === ''){
+              _this._prevItem(e);
+            }
+          }, 20);
+        }
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,10 @@
+*
+!cookbook-server/src
+!cookbook-server/package.json
+!cookbook-server/bin
+!cookbook-server/routes
+!cookbook-server/repository
+!cookbook-server/views
+!cookbook-server/app.js
+
+!cookbook-ui
